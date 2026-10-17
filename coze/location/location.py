@@ -1,3 +1,4 @@
+import os
 from runtime import Args
 from typings.location.location import Input, Output
 import requests
@@ -10,11 +11,11 @@ import requests
 import mysql.connector
 
 db = mysql.connector.connect(
-    host="yourhost",
-    port=3306,
-    user="root",
-    password="password",
-    database="parking_lots"
+    host=os.environ["DB_HOST"],
+    port=int(os.environ.get("DB_PORT", "3306")),
+    user=os.environ["DB_USER"],
+    password=os.environ["DB_PASSWORD"],
+    database=os.environ["DB_NAME"]
 )
 
 
@@ -38,14 +39,14 @@ def handler(args: Args[Input]) -> Output:
     logger = args.logger
     url = "https://restapi.amap.com/v3/place/around"
     params = {
-        "key": "your_api_key",
+        "key": os.environ["AMAP_API_KEY"],
         "location": get_coordinates(input.target),
         "radius": 500,
         "types": "停车场",
         "offset": 10,
         "extensions": "all"
     }
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=8)
     data = response.json()
     if "pois" not in data:
         logger.warning("No parking lots found.")
@@ -75,8 +76,8 @@ def get_coordinates(place_name: str) -> str:
     返回:
     str: 经纬度坐标，格式为 "latitude,longitude"
     """
-    url = f"https://restapi.amap.com/v3/geocode/geo?key=f3778e99ae3cdd480f430bb91da48166&address={place_name}"
-    response = requests.get(url)
+    url = f"https://restapi.amap.com/v3/geocode/geo?key={os.environ['AMAP_API_KEY']}&address={place_name}"
+    response = requests.get(url, timeout=8)
     data = response.json()
     if "geocodes" not in data:
         raise ValueError(f"无法获取 {place_name} 的经纬度坐标")
@@ -102,7 +103,7 @@ def get_next_parking_id(area_code, logger):
     result = cursor.fetchone()
 
     cursor.close()
-    if result:
+    if result and result[0] is not None:
         # 如果存在，返回当前最大值加1
         return area_code + '-' + str(result[0] + 1)
     else:
@@ -112,7 +113,7 @@ def get_next_parking_id(area_code, logger):
 
 
 def parse_location(entr_location):
-    latitude, longitude = map(float, entr_location.split(','))
+    longitude, latitude = map(float, entr_location.split(','))
     return latitude, longitude
 
 

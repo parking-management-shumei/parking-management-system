@@ -1,30 +1,25 @@
 from runtime import Args
 from typings.Parking_charging_system.Parking_charging_system import Input, Output
+from decimal import Decimal, ROUND_HALF_UP
+from math import ceil
 
-class Input:
-    total_seconds : int
-    reg1 : float # 起步价
-    reg2 : float # 最大费用
-    reg3 : float # 单位费用
-    unit : int
-    free_time : int
+def calculate_price(total_seconds, reg1, reg2, reg3, unit, free_time):
+    """Grace threshold, started-unit billing, cap for each 24h block. Matches Java BillingService for unit=60."""
+    seconds = int(total_seconds)
+    unit = int(unit)
+    free_time = int(free_time)
+    first, cap, rate = (Decimal(str(v)) for v in (reg1, reg2, reg3))
+    if seconds < 0 or unit <= 0 or 1440 % unit != 0 or free_time < 0:
+        raise ValueError("Invalid duration, billing unit or grace period")
+    if not all(v.is_finite() and v >= 0 for v in (first, cap, rate)):
+        raise ValueError("Invalid fee")
+    if seconds <= free_time * 60:
+        return 0.0
+    days, remainder = divmod(seconds, 86400)
+    full = min(cap, first + max(0, 1440 // unit - 1) * rate)
+    partial = min(cap, first + max(0, ceil(remainder / (unit * 60)) - 1) * rate) if remainder else Decimal(0)
+    return float((days * full + partial).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
-def handler(args: Args[Input])->Output:
-    input = args.input
-    reg1 = input.reg1
-    reg2 = input.reg2
-    reg3 = input.reg3
-    unit = input.unit
-    free_time = input.free_time
-    logger = args.logger
-
-    if(input.total_seconds == 0) :
-        return {"price" : 100000}
-    times = (input.total_seconds + 59) // 60
-    res = 0
-    if(times <= free_time) :
-        res = 0
-    else :
-        res = reg1
-        res += min(reg2, ((times + unit - 1) // unit - 1) * reg3)
-    return {"price": res}
+def handler(args: Args[Input]) -> Output:
+    i = args.input
+    return {"price": calculate_price(i.total_seconds, i.reg1, i.reg2, i.reg3, i.unit, i.free_time)}

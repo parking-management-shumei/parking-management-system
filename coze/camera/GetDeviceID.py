@@ -1,14 +1,15 @@
+import os
 from runtime import Args
 from typings.GetDeviceID.GetDeviceID import Input, Output
 import mysql.connector
 
 db=mysql.connector.connect(
-    host="your_host",
-    port=3306,
-    user="root",
-    password="password",
+    host=os.environ["DB_HOST"],
+    port=int(os.environ.get("DB_PORT", "3306")),
+    user=os.environ["DB_USER"],
+    password=os.environ["DB_PASSWORD"],
     connect_timeout=30,
-    database="parking_lots"
+    database=os.environ["DB_NAME"]
 )
 
 def handler(args: Args[Input])->Output:
@@ -21,8 +22,8 @@ def handler(args: Args[Input])->Output:
 
 def select_mysql(target:str)->list:
     cursor = db.cursor()
-    sql = "select parking_id from parking_lots_data where parking_name = %s"%target
-    cursor.execute(sql)
+    sql = "select parking_id from parking_lots_data where parking_name = %s"
+    cursor.execute(sql, (target,))
     results = cursor.fetchall()
     # db.close()
     return results

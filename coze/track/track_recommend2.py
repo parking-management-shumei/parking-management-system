@@ -1,3 +1,4 @@
+import os
 from runtime import Args
 from typings.track_recommend.track_recommend import Input, Output
 import requests
@@ -27,12 +28,12 @@ def handler(args: Args[Input]) -> Output:
     url = f"https://restapi.amap.com/v3/direction/driving"
     params = {
         "strategy": 2,
-        "key": "your_api_ket",
+        "key": os.environ["AMAP_API_KEY"],
         "origin": f"{input.start_lng},{input.start_lat}",
         "destination": f"{input.end_lng},{input.end_lat}",
     }
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=8)
     data = response.json()
     logger.warning(data)
 

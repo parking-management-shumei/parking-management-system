@@ -1,3 +1,4 @@
+import os
 from runtime import Args
 from typings.Get_parking_total.Get_parking_total import Input, Output
 import requests
@@ -10,12 +11,12 @@ import requests
 import mysql.connector
 
 db = mysql.connector.connect(
-    host="your_host",
-    port=3306,
-    user="root",
-    password="password",
+    host=os.environ["DB_HOST"],
+    port=int(os.environ.get("DB_PORT", "3306")),
+    user=os.environ["DB_USER"],
+    password=os.environ["DB_PASSWORD"],
     connect_timeout=30,
-    database="parking_lots"
+    database=os.environ["DB_NAME"]
 )
 
 def handler(args: Args[Input]) -> Output:

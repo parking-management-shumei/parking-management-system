@@ -1,0 +1,35 @@
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:8090}
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:h2:file:./data/parking;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;WRITE_DELAY=0}
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:}
+  sql:
+    init:
+      mode: always
+  jackson:
+    time-zone: Asia/Shanghai
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+app:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:8080,http://127.0.0.1:8080}
+  admin-password: ${ADMIN_PASSWORD:}
+coze:
+  token: ${COZE_API_TOKEN:}
+  base-url: ${COZE_BASE_URL:https://api.coze.cn}
+  bot-id: ${COZE_BOT_ID:}
+  billing-workflow-id: ${COZE_WF_CHARGE:}
+  reverse-workflow-id: ${COZE_WF_REVERSE_SEARCH:}
+  route-workflow-id: ${COZE_WF_ROUTE_RECOMMEND:}
+  service-token: ${COZE_SERVICE_TOKEN:}

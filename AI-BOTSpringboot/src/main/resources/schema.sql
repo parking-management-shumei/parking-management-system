@@ -1,0 +1,24 @@
+CREATE TABLE IF NOT EXISTS app_user (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY, no VARCHAR(32) NOT NULL UNIQUE, name VARCHAR(60) NOT NULL,
+ password VARCHAR(100) NOT NULL, age INT, sex INT, phone VARCHAR(20) UNIQUE, role_id INT NOT NULL DEFAULT 2
+);
+CREATE TABLE IF NOT EXISTS app_menu (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY, menu_name VARCHAR(60), menu_click VARCHAR(60), menu_component VARCHAR(120), menu_icon VARCHAR(60), min_role INT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS parking_lot (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL, address VARCHAR(200), capacity INT NOT NULL,
+ first_price DECIMAL(12,2) NOT NULL, hourly_price DECIMAL(12,2) NOT NULL, daily_cap DECIMAL(12,2) NOT NULL, free_minutes INT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS vehicle_record (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY, lot_id BIGINT NOT NULL, user_id BIGINT NOT NULL, numberplate VARCHAR(20) NOT NULL,
+ space_code VARCHAR(40) NOT NULL, entry_time TIMESTAMP NOT NULL, exit_time TIMESTAMP,
+ active_plate VARCHAR(20) UNIQUE, active_space VARCHAR(100) UNIQUE,
+ FOREIGN KEY (lot_id) REFERENCES parking_lot(id), FOREIGN KEY (user_id) REFERENCES app_user(id)
+);
+CREATE TABLE IF NOT EXISTS parking_order (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY, record_id BIGINT NOT NULL UNIQUE, user_id BIGINT NOT NULL, lot_id BIGINT NOT NULL,
+ amount DECIMAL(12,2) NOT NULL, status VARCHAR(20) NOT NULL, billing_source VARCHAR(20) NOT NULL, workflow_trace VARCHAR(8000),
+ created_at TIMESTAMP NOT NULL, paid_at TIMESTAMP,
+ FOREIGN KEY(record_id) REFERENCES vehicle_record(id), FOREIGN KEY(user_id) REFERENCES app_user(id), FOREIGN KEY(lot_id) REFERENCES parking_lot(id)
+);

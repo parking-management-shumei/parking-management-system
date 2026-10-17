@@ -3,11 +3,13 @@ package com.aibot.aibotspringboot;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(
+    exclude =
+        org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+            .class)
 public class AiBotSpringbootApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(AiBotSpringbootApplication.class, args);
-    }
-
+  public static void main(String[] args) {
+    SpringApplication.run(AiBotSpringbootApplication.class, args);
+  }
 }

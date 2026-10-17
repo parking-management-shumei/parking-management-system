@@ -21,7 +21,7 @@ import Aside from "./Aside";
 import Header from "./Header";
 
 export default {
-  name: "Index",
+  name: "AppLayout",
   components: { Aside, Header },
   data() {
     return {

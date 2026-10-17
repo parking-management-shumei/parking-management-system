@@ -5,7 +5,7 @@
       text-color="cadetblue"
       active-text-color="darkslategray"
       style="height: 100%;"
-      default-active="/Home"
+      :default-active="$route.path"
       :collapse="isCollapse"
       :collapse-transition="false"
       router
@@ -25,7 +25,7 @@
 
 <script>
 export default {
-  name: "Aside",
+  name: "AppAside",
   props: {
     isCollapse: Boolean
   },

@@ -1,67 +1,63 @@
-import VueRouter from 'vue-router';
-
-const routes = [
-    {
-        path:'/',
-        name:'login',
-        component:()=>import('../components/Login')
-    },
-    {
-        path: '/register',
-        name: 'Register',
-        component: ()=>import('../components/register.vue')
-    },
-
-    {
-        path:'/Index',
-        name:'index',
-        component:()=>import('../components/Index'),
-        children:[
-            // {
-            //     path:'/Home',
-            //     name:'home',
-            //     meta:{
-            //         title:'首页'
-            //     },
-            //     component:()=>import('../components/Home')
-            // },
-            {
-                path:'/Home',
-                name:'home',
-                meta:{
-                    title:'个人中心'
-                },
-                component:()=>import('../components/Home')
-            },
-            {
-                path:'/IndexMain',
-                name:'indexMain',
-                meta:{
-                    title:'首页'
-                },
-                component:()=>import('../components/Index/IndexManage.vue')
-            },
-        ]
-    }
-]
-
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import api from '../api'
+import store from '../store'
+Vue.use(VueRouter)
 const router = new VueRouter({
-    mode:'history',
-    routes
+  mode: 'history',
+  routes: [
+    { path: '/', component: () => import('../components/Login.vue'), meta: { public: true } },
+    {
+      path: '/register',
+      component: () => import('../components/register.vue'),
+      meta: { public: true },
+    },
+    {
+      path: '/Index',
+      redirect: '/IndexMain',
+      component: () => import('../components/Index.vue'),
+      children: [
+        { path: '/IndexMain', component: () => import('../components/Index/IndexManage.vue') },
+        { path: '/Home', component: () => import('../components/Home.vue') },
+        {
+          path: '/operations',
+          component: () => import('../components/parking/Operations.vue'),
+          meta: { maxRole: 1 },
+        },
+        {
+          path: '/reports',
+          component: () => import('../components/parking/Reports.vue'),
+          meta: { maxRole: 1 },
+        },
+        { path: '/parking', component: () => import('../components/parking/ParkingAssistant.vue') },
+        { path: '/chat', component: () => import('../components/chat/ChatManage.vue') },
+        {
+          path: '/user',
+          component: () => import('../components/user/UserManage.vue'),
+          meta: { maxRole: 1 },
+        },
+        {
+          path: '/admin',
+          component: () => import('../components/admin/AdminManage.vue'),
+          meta: { maxRole: 0 },
+        },
+      ],
+    },
+    { path: '*', redirect: '/' },
+  ],
 })
-
-export function resetRouter() {
-    const originalPush = VueRouter.prototype.push
-    VueRouter.prototype.push = function push(location) {
-        return originalPush.call(this, location).catch(err => err)
-    }
-    router.matcher = new VueRouter({
-        mode: 'history',
-        routes: [...router.options.routes] // 使用现有的路由数组复制
-    }).matcher
-}
-const VueRouterPush = VueRouter.prototype.push
-VueRouter.prototype.push = function push (to) {
-    return VueRouterPush.call(this, to).catch(err => err)
-}
-export  default router;
+router.beforeEach(async (to, from, next) => {
+  if (to.matched.some((r) => r.meta.public)) return next()
+  try {
+    const { data: result } = await api.get('/user/me')
+    const { user, menu } = result.data
+    sessionStorage.setItem('CurUser', JSON.stringify(user))
+    store.commit('setMenu', menu)
+    if (to.matched.some((r) => r.meta.maxRole !== undefined && user.roleId > r.meta.maxRole))
+      return next('/parking')
+    next()
+  } catch (error) {
+    next('/')
+  }
+})
+export default router

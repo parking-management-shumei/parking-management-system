@@ -9,7 +9,7 @@
 
 <script>
 export default {
-  name:'Rdio',
+  name:'VoiceInput',
   data() {
     return {
       recognition: null,
@@ -19,7 +19,7 @@ export default {
   },
   mounted() {
     if ('webkitSpeechRecognition' in window) {
-      this.recognition = new (window.SpeechRecognition || webkitSpeechRecognition)();
+      this.recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       this.recognition.continuous = true;
       this.recognition.interimResults = true;
       this.recognition.lang = 'zh-CN'; // 设置识别语言

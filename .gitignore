@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.cache/
+.env.local
+.env.*.local
+target/
+data/
+*.log
+__pycache__/
+*.pyc
+.idea/
+*.iml
+.DS_Store
+yarn.lock

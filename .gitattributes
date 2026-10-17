@@ -1,0 +1,9 @@
+* text=auto
+*.java text eol=lf
+*.js text eol=lf
+*.vue text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.sql text eol=lf
